@@ -1,0 +1,32 @@
+{
+  "name": "node-app-template",
+  "version": "1.0.0",
+  "description": "Template for a Nodejs web application.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "aaron shivers",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "bcrypt": "^3.0.2",
+    "cookie-parser": "^1.4.3",
+    "dotenv": "^6.1.0",
+    "ejs": "^2.6.1",
+    "express": "^4.16.4",
+    "jsonwebtoken": "^8.4.0",
+    "mongoose": "^5.3.13"
+  },
+  "devDependencies": {
+    "morgan": "^1.9.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aaronshivers/node-app-template.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aaronshivers/node-app-template/issues"
+  },
+  "homepage": "https://github.com/aaronshivers/node-app-template#readme"
+}
