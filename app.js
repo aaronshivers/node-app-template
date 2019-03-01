@@ -6,9 +6,9 @@ const cookieParser = require('cookie-parser')
 
 const {mongoose} = require('./db/mongoose')
 
-const indexRoutes = require('./routes/index-routes')
-const userRoutes = require('./routes/user-routes')
-const todoRoutes = require('./routes/todo-routes')
+const index = require('./routes/index')
+const users = require('./routes/user')
+const todos = require('./routes/todo')
 
 const app = express()
 const port = process.env.PORT
@@ -23,9 +23,9 @@ app.set('view engine', 'ejs')
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-app.use(indexRoutes)
-app.use(userRoutes)
-app.use(todoRoutes)
+app.use('/', index)
+app.use('/users', users)
+app.use('/todos', todos)
 
 app.listen(port, () => {
 	console.log(`Server running on port ${port}.`)

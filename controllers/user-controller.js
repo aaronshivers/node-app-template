@@ -2,8 +2,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const _ = require('lodash')
 
-const User = require('../models/user-model')
-const {generateToken} = require('./../middleware/generate-token')
+const User = require('../models/users')
 
 // Display Signup Form on GET
 exports.signupFormGet = (req, res) => {
@@ -18,7 +17,7 @@ exports.signupFormPost = (req, res) => {
 	const user = new User(body)
 
 	user.save().then((user) => {
-		return generateToken(user)
+		return user.createAuthToken()
 	}).then((token) => {
 		res.cookie('token', token).send(user)
 	}).catch((err) => {

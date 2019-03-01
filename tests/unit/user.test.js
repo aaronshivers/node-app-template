@@ -2,7 +2,7 @@ require('dotenv').config()
 
 const jwt = require('jsonwebtoken')
 const { ObjectId } = require('mongodb')
-const { User } = require('../../../models/users')
+const { User } = require('../../models/users')
 
 describe('user.createAuthToken', () => {
   it('should return a valid JWT', () => {

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const MongoClient = require('mongodb').MongoClient
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 const saltingRounds = 10
 
@@ -41,4 +42,13 @@ userSchema.pre('save', function(next) {
 	}
 })
 
-module.exports = mongoose.model('User', userSchema)
+userSchema.methods.createAuthToken = function () {
+  const payload = { _id: this._id, isAdmin: this.isAdmin }
+  const secret = process.env.JWT_SECRET
+  const options = { expiresIn: '2d' }
+  return jwt.sign(payload, secret, options)
+}
+
+const User = mongoose.model('User', userSchema)
+
+module.exports = { User }

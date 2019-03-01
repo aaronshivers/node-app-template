@@ -4,7 +4,7 @@ const router = express.Router()
 // controller modules
 const userController = require('../controllers/user-controller')
 
-const User = require('../models/user-model')
+const User = require('../models/users')
 const {validateToken} = require('../utilities')
 
 // Get request for Signup Form

@@ -3,7 +3,7 @@ const router = express.Router()
 const _ = require('lodash')
 const {ObjectId} = require('mongodb')
 
-const Todo = require('../models/todo-model')
+const Todo = require('../models/todos')
 
 // GET /todos
 router.get('/todos', (req, res) => {
