@@ -4,26 +4,23 @@ const bcrypt = require('bcrypt')
 
 const saltingRounds = 10
 
-const server = process.env.MONGO_SERVER
-const database = process.env.MONGO_DATABASE
-const user = process.env.MONGO_USER
-const pass = process.env.MONGO_PASS
-const encodedpass = encodeURIComponent(pass)
-const url = `mongodb://${user}:${encodedpass}@${server}/${database}`
-
-mongoose.connect(url, {useNewUrlParser: true})
-
 const userSchema = new mongoose.Schema({
 	username: {
 		type: String,
 		required: true,
+		minlength: 4,
 		unique: true,
 		trim: true
 	},
 	password: {
 		type: String,
 		required: true,
+		minlength: 4,
 		trim: true
+	},
+	token: {
+		type: String,
+		required: false
 	}
 })
 
@@ -44,4 +41,4 @@ userSchema.pre('save', function(next) {
 	}
 })
 
-module.exports = User = mongoose.model('User', userSchema)
+module.exports = mongoose.model('User', userSchema)

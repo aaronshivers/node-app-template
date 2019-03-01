@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-const validateToken = require('../utilities')
+const {validateToken} = require('../utilities')
 const indexController = require('../controllers/index-controller')
 
 router.get('/', (req, res) => {

@@ -5,7 +5,7 @@ const router = express.Router()
 const userController = require('../controllers/user-controller')
 
 const User = require('../models/user-model')
-const validateToken = require('../utilities')
+const {validateToken} = require('../utilities')
 
 // Get request for Signup Form
 router.get('/signup', userController.signupFormGet)
@@ -18,6 +18,9 @@ router.get('/login', userController.loginForm)
 
 // POST request for User Login
 router.post('/login', userController.userLoginPost)
+
+// Clear authentication token/cookie
+router.get('/logout', userController.logout)
 
 // Get request for list of all users, if user = Admin
 router.route('/users').get(validateToken, userController.userList)

@@ -1,5 +1,9 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const _ = require('lodash')
+
+const User = require('../models/user-model')
+const {generateToken} = require('./../middleware/generate-token')
 
 // Display Signup Form on GET
 exports.signupFormGet = (req, res) => {
@@ -10,15 +14,15 @@ exports.signupFormGet = (req, res) => {
 
 // Handles Signup Form on Post
 exports.signupFormPost = (req, res) => {
+	const body = _.pick(req.body, ['username', 'password'])
+	const user = new User(body)
 
-	const newUser = req.body
-
-	User.create(newUser, (err, user) => {
-		if (!err) {
-			res.redirect('login')
-		} else {
-			res.status(500).send(err)
-		}
+	user.save().then((user) => {
+		return generateToken(user)
+	}).then((token) => {
+		res.cookie('token', token).send(user)
+	}).catch((err) => {
+		res.status(400).send(err)
 	})
 }
 
@@ -43,37 +47,63 @@ exports.loginForm = (req, res) => {
 	})
 }
 
-// Handle User Login on POST
-exports.userLoginPost = (req, res) => {
-	
-	const { username, password } = req.body
 
-	User.findOne({username}, (err, user) => {
-		if (!err && user) {
-			bcrypt.compare(password, user.password).then(match => {
-				if (match) {
-					const payload = { username: user.username }
-					const secret = process.env.JWT_SECRET
-					const options = { expiresIn: '2d', issuer: 'https://www.demo.com' }
-					const token = jwt.sign(payload, secret, options)
-					res.cookie('token', token).redirect('profile')
-				} else {
-					// res.status(401).send(`Authentication Error!`)
-					res.redirect('login')
-				}
-			}).catch(err => res.status(500).send(err))
-		} else {
-			// res.redirect('login')
-			res.status(404).send(`We could not find that information in our database.</br>
-			<a href="/login">Login</a> or <a href="/signup">Signup</a>`)
+
+const findByCredentials = (username, password) => {
+	
+	return User.findOne({username}).then((user) => {
+		if (!user) {
+			return Promise.reject(new Error('Username incorrect or not provided'))
 		}
+		return new Promise((resolve, reject) => {
+			bcrypt.compare(password, user.password, (err, hash) => {
+				if (hash) {
+					resolve(user)
+				} else {
+					reject('Password incorrect or not provided')
+					// reject(new Error('Password incorrect or not provided'))
+				}
+			})
+		})
 	})
 }
+
+// Handle User Login on POST
+exports.userLoginPost = (req, res) => {
+	const body = _.pick(req.body, ['username', 'password'])
+	
+	findByCredentials(body.username, body.password).then((user) => {
+		return generateToken(user)
+	}).then((value) => {
+			res.cookie('token', value.token).send(value.user)
+	}).catch((err) => {
+		console.log(err.stack)
+		res.send(err.stack)
+	})
+}
+
+	// , (err, user) => {
+	// 	console.log(user)
+	// 	if (!err && user) {
+	// 		bcrypt.compare({password: body.password}, user.password).then(match => {
+	// 			if (match) {
+	// 				res.cookie('token', token).send(user)
+	// 			} else {
+	// 				// res.status(401).send(`Authentication Error!`)
+	// 				res.redirect('login')
+	// 			}
+	// 		}).catch(err => res.status(500).send(err))
+	// 	} else {
+	// 		// res.redirect('login')
+	// 		res.status(404).send(`We could not find that information in our database.</br>
+	// 		<a href="/login">Login</a> or <a href="/signup">Signup</a>`)
+	// 	}
+	// })
 
 exports.adminGet = (req, res) => {
 
 	const username = verifiedUser
-	console.log(username)
+	// console.log(username)
 
 	if (username === 'admin') {
 		res.send('hello admin')
@@ -88,3 +118,9 @@ exports.profileGet = (req, res) => {
 		userName: verifiedUser
 	})
 }
+
+// Logout user 
+exports.logout = (req, res) => {
+	res.clearCookie('token').send('You\'ve been logged out.')
+}
+
