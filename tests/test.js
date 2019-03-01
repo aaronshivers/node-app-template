@@ -9,16 +9,6 @@ const {validateToken} = require('../utilities')
 
 beforeEach(populateUsers)
 
-// GET /
-describe('GET /', () => {
-  it('should respond with 200', (done) => {
-    request(app)
-      .get('/')
-      .expect(200)
-      .end(done)
-  })
-})
-
 //============================================
 // signup ====================================
 //============================================
