@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-// const MongoClient = require('mongodb').MongoClient
 
 const todoSchema = new mongoose.Schema({
   text: {

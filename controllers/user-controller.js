@@ -13,7 +13,7 @@ exports.signupFormGet = (req, res) => {
 
 // Handles Signup Form on Post
 exports.signupFormPost = (req, res) => {
-	const body = _.pick(req.body, ['username', 'password'])
+	const body = _.pick(req.body, ['email', 'password'])
 	const user = new User(body)
 
 	user.save().then((user) => {
@@ -27,6 +27,7 @@ exports.signupFormPost = (req, res) => {
 
 // Display list of all users
 exports.userList = (req, res) => {
+	console.log('fart')
 	User.find({}, (err, allUsers) => {
 		if (!err) {
 			// res.render('users', {
@@ -68,17 +69,33 @@ const findByCredentials = (username, password) => {
 }
 
 // Handle User Login on POST
-exports.userLoginPost = (req, res) => {
-	const body = _.pick(req.body, ['username', 'password'])
+exports.userLoginPost = async (req, res) => {
+	const { email, password } = req.body
+
+	try {
+		// find user by email
+	  const user = await User.findOne({ email })
+
+	  // reject if email is not in the DB
+	  if (!user) return res.status(404).send('User Not Found')
 	
-	findByCredentials(body.username, body.password).then((user) => {
-		return generateToken(user)
-	}).then((value) => {
-			res.cookie('token', value.token).send(value.user)
-	}).catch((err) => {
-		console.log(err.stack)
-		res.send(err.stack)
-	})
+	  // return user email
+		res.send(user.email)
+	} catch (error) {
+	  console.log(error)
+	}
+
+
+	// const body = _.pick(req.body, ['email', 'password'])
+	
+	// findByCredentials(body.email, body.password).then((user) => {
+	// 	return user.createAuthToken()
+	// }).then((value) => {
+	// 		res.cookie('token', value.token).send(value.user)
+	// }).catch((err) => {
+	// 	console.log(err.stack)
+	// 	res.send(err.stack)
+	// })
 }
 
 	// , (err, user) => {

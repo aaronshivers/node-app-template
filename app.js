@@ -4,14 +4,13 @@ const express = require('express')
 const morgan = require('morgan')
 const cookieParser = require('cookie-parser')
 
-const {mongoose} = require('./db/mongoose')
+require('./db/mongoose')
 
-const index = require('./routes/index')
-const users = require('./routes/user')
-const todos = require('./routes/todo')
+const indexRouter = require('./routes/index')
+const userRouter = require('./routes/users')
+const todoRouter = require('./routes/todos')
 
 const app = express()
-const port = process.env.PORT
 
 app.use(morgan('combined'))
 
@@ -23,12 +22,8 @@ app.set('view engine', 'ejs')
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-app.use('/', index)
-app.use('/users', users)
-app.use('/todos', todos)
+app.use('/', indexRouter)
+app.use('/users', userRouter)
+app.use('/todos', todoRouter)
 
-app.listen(port, () => {
-	console.log(`Server running on port ${port}.`)
-})
-
-module.exports = {app}
+module.exports = app

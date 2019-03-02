@@ -1,12 +1,11 @@
+require('dotenv').config()
+
 const mongoose = require('mongoose')
-const MongoClient = require('mongodb').MongoClient
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
-const saltingRounds = 10
-
 const userSchema = new mongoose.Schema({
-	username: {
+	email: {
 		type: String,
 		required: true,
 		minlength: 4,
@@ -24,21 +23,18 @@ const userSchema = new mongoose.Schema({
 	}
 })
 
-userSchema.pre('save', function(next) {
-	const user = this
-	if(!user.isModified || !user.isNew) {
-		next()
-	} else {
-		bcrypt.hash(user.password, saltingRounds, (err, hash) => {
-			if (err) {
-				console.log(`Error hashing user password. User: ${ user.name }`)
-				next(err)
-			} else {
-				user.password = hash
-				next()
-			}
-		})
+userSchema.pre('save', async function(next) {
+	const saltingRounds = 10
+
+	if (this.isModified || this.isNew) {
+		try {
+		  const hash = await bcrypt.hash(this.password, saltingRounds)
+		  this.password = hash
+		} catch (error) {
+		  next(error)
+		}
 	}
+	next()
 })
 
 userSchema.methods.createAuthToken = function () {
@@ -48,6 +44,4 @@ userSchema.methods.createAuthToken = function () {
   return jwt.sign(payload, secret, options)
 }
 
-const User = mongoose.model('User', userSchema)
-
-module.exports = { User }
+module.exports = mongoose.model('User', userSchema)

@@ -1,9 +1,8 @@
 require('dotenv').config()
 
-const expect = require('expect')
 const jwt = require('jsonwebtoken')
 const { ObjectId } = require('mongodb')
-const { User } = require('../../models/users')
+const User = require('../../models/users')
 
 describe('user.createAuthToken', () => {
   it('should return a valid JWT', () => {
@@ -14,6 +13,7 @@ describe('user.createAuthToken', () => {
     const secret = process.env.JWT_SECRET
     const options = { expiresIn: '2d' }
     const decoded = jwt.verify(token, secret, options)
+    
     expect(decoded).toHaveProperty('_id', _id.toString())
     expect(decoded).toHaveProperty('isAdmin', true)
   })

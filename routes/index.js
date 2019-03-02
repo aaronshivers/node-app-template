@@ -1,16 +1,11 @@
 const express = require('express')
 const router = express.Router()
 
-const {validateToken} = require('../utilities')
-const indexController = require('../controllers/index-controller')
+// const { validateToken } = require('../utilities')
 
-router.get('/', (req, res) => {
-	res.render('index', {
-		title: `Index Page`
-	})
-})
+router.get('/', (req, res) => res.send('hello'))
 
 // Display Secrets on GET, if logged in
-router.route('/secrets').get(validateToken, indexController.secretsGet)
+// router.route('/secrets').get(validateToken, indexController.secretsGet)
 
 module.exports = router
