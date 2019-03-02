@@ -20,9 +20,33 @@ const userSchema = new mongoose.Schema({
 	},
 	isAdmin: {
 		type: Boolean
-	}
+	},
+	tokens: [{
+		token: {
+			type: String,
+			required: true
+		}
+	}]
 })
 
+userSchema.statics.findByCredentials = async (username, password) => {
+	
+	// find user by email
+	const user = await User.findOne({ email })
+
+	// reject if email is not found in the DB
+	if (!user) throw new Error('Invalid Login Credentials')
+
+	// compare passwords
+	const isMatch = await bcrypt.compare(password, user.password)
+
+	// reject if passwords don't match
+	if (!isMatch) throw new Error('Invalid Login Credentials')
+
+	return user
+}
+
+// hash plain text passwords
 userSchema.pre('save', async function(next) {
 	const saltingRounds = 10
 
@@ -37,11 +61,23 @@ userSchema.pre('save', async function(next) {
 	next()
 })
 
-userSchema.methods.createAuthToken = function () {
+// userSchema.methods.createAuthToken = function () {
+//   const payload = { _id: this._id, isAdmin: this.isAdmin }
+//   const secret = process.env.JWT_SECRET
+//   const options = { expiresIn: '2d' }
+//   return jwt.sign(payload, secret, options)
+// }
+
+userSchema.methods.createAuthToken = async function () {
   const payload = { _id: this._id, isAdmin: this.isAdmin }
   const secret = process.env.JWT_SECRET
   const options = { expiresIn: '2d' }
-  return jwt.sign(payload, secret, options)
+	const token = await jwt.sign(payload, secret, options)
+
+	this.tokens = this.tokens.concat({ token })
+	await this.save()
+
+	return token
 }
 
 module.exports = mongoose.model('User', userSchema)

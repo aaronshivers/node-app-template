@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 const User = require('../models/users')
+const auth = require('../middleware/auth')
 
 // controller modules
 const userController = require('../controllers/user-controller')
@@ -24,12 +25,10 @@ router.post('/login', userController.userLoginPost)
 router.get('/logout', userController.logout)
 
 // Get request for list of all users, if user = Admin
-// router.route('/').get(validateToken, userController.userList)
-router.route('/').get(userController.userList)
-// router.get('/', (req, res) => res.send('hello'))
+router.route('/').get(auth, userController.userList)
 
 // GET request for User Profile
-router.route('/profile').get(validateToken, userController.profileGet)
+router.route('/profile').get(auth, userController.profileGet)
 
 // Get request for Admin Page
 router.route('/admin').get(validateToken, userController.adminGet)

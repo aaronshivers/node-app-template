@@ -12,17 +12,32 @@ exports.signupFormGet = (req, res) => {
 }
 
 // Handles Signup Form on Post
-exports.signupFormPost = (req, res) => {
-	const body = _.pick(req.body, ['email', 'password'])
-	const user = new User(body)
+exports.signupFormPost = async (req, res) => {
+	const { email, password } = req.body
 
-	user.save().then((user) => {
-		return user.createAuthToken()
-	}).then((token) => {
-		res.cookie('token', token).send(user)
-	}).catch((err) => {
-		res.status(400).send(err)
-	})
+	try {
+		// check if user exists
+		const existingUser = await User.findOne({ email })
+
+		// reject if user already exists
+		if (existingUser) return res.status(400).send('User Already Exists')
+
+		// create new user
+		const user = new User({ email, password })
+
+		// save user
+		user.save()
+
+		// create token
+		const token = await user.createAuthToken()
+
+		// set header and return user info
+		res.header('x-auth-token', token).send({ email })
+	} catch (error) {
+	  res.status(400).send()
+	}
+
+
 }
 
 // Display list of all users
@@ -47,42 +62,22 @@ exports.loginForm = (req, res) => {
 	})
 }
 
-
-
-const findByCredentials = (username, password) => {
-	
-	return User.findOne({username}).then((user) => {
-		if (!user) {
-			return Promise.reject(new Error('Username incorrect or not provided'))
-		}
-		return new Promise((resolve, reject) => {
-			bcrypt.compare(password, user.password, (err, hash) => {
-				if (hash) {
-					resolve(user)
-				} else {
-					reject('Password incorrect or not provided')
-					// reject(new Error('Password incorrect or not provided'))
-				}
-			})
-		})
-	})
-}
-
 // Handle User Login on POST
 exports.userLoginPost = async (req, res) => {
 	const { email, password } = req.body
 
 	try {
-		// find user by email
-	  const user = await User.findOne({ email })
 
-	  // reject if email is not in the DB
-	  if (!user) return res.status(404).send('User Not Found')
+		// find user by email and confirm correct password
+		const user = await User.findByCredentials(email, password)
+
+	  // generate authentication token
+		const token = await user.createAuthToken()
 	
 	  // return user email
-		res.send(user.email)
+		res.send({ user, token })
 	} catch (error) {
-	  console.log(error)
+	  res.status(400).send()
 	}
 
 
@@ -129,10 +124,7 @@ exports.adminGet = (req, res) => {
 }
 
 exports.profileGet = (req, res) => {
-	res.render('profile', {
-		title: 'Profile',
-		userName: verifiedUser
-	})
+	res.send(req.user)
 }
 
 // Logout user 
